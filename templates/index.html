@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Agent Scheduler</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 2rem;
+        }
+        #response {
+            margin-top: 2rem;
+        }
+        .details-cell {
+            max-width: 400px;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Secure Agent Scheduler</h1>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Schedule a New Event</h5>
+                <form id="schedule-form">
+                    <div class="mb-3">
+                        <label for="user-request" class="form-label">User Request</label>
+                        <input type="text" class="form-control" id="user-request" placeholder="e.g., Schedule a meeting tomorrow at 2pm" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="user-id" class="form-label">User ID</label>
+                        <input type="text" class="form-control" id="user-id" placeholder="e.g., user-123" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Schedule</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="response" class="card" style="display: none;">
+            <div class="card-body">
+                <h5 class="card-title">API Response</h5>
+                <pre id="response-content"></pre>
+            </div>
+        </div>
+
+        <div id="audit-log-container" class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">Audit Log</h5>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Action</th>
+                            <th>Summary</th>
+                            <th>Full Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in audit_log %}
+                        <tr>
+                            <td>{{ entry.timestamp }}</td>
+                            <td>{{ entry.action }}</td>
+                            <td>
+                                {% if entry.action == 'planner_agent.process' %}
+                                    <strong>Request:</strong> {{ entry.details.input.user_request }}<br>
+                                    <strong>Event:</strong> {{ entry.details.result.data.event.title }} at {{ entry.details.result.data.event.start_time }}
+                                {% elif entry.action == 'notifier_agent.process' %}
+                                    <strong>Notification:</strong> {{ entry.details.input.title }}<br>
+                                    <strong>Message:</strong> {{ entry.details.input.message }}
+                                {% else %}
+                                    No summary available.
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" href="#collapse-{{ loop.index }}" role="button" aria-expanded="false" aria-controls="collapse-{{ loop.index }}">
+                                    View
+                                </a>
+                                <div class="collapse" id="collapse-{{ loop.index }}">
+                                    <pre>{{ entry.details | tojson(indent=2) }}</pre>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('schedule-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const userRequest = document.getElementById('user-request').value;
+            const userId = document.getElementById('user-id').value;
+
+            const response = await fetch('/api/schedule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_request: userRequest,
+                    user_id: userId
+                })
+            });
+
+            const responseData = await response.json();
+            document.getElementById('response-content').textContent = JSON.stringify(responseData, null, 2);
+            document.getElementById('response').style.display = 'block';
+            
+            // Refresh the page to see the updated audit log
+            location.reload();
+        });
+    </script>
+</body>
+</html>
