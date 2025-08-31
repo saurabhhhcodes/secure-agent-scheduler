@@ -3,15 +3,15 @@
 A secure multi-agent system for scheduling and notifications, built for the Descope Global MCP Hackathon. It uses a Planner Agent to create calendar events from natural language and a Notifier Agent to send reminders, with all agent-to-agent communication secured by Descope.
 
 ## Team
-- **Team Name:** [YOUR TEAM NAME]
-- **Team Members:** [LIST OF TEAM MEMBERS]
+- **Team Name:** saurabhhhcodes
+- **Team Members:** Saurabh Kumar Bajpai (Leader)
 
 ## Hackathon Submission
 - **Theme:** Theme 3: Secure Agent-to-Agent Communication
 - **Challenge:** Scheduling and Notification Flow
 
 ## Demo
-**Demo Video Link:** [Link to your 5-minute demo video]
+**Demo Video Link:** https://vimeo.com/1114598847?share=copy
 
 ## What We Built
 Our project is a multi-agent system that securely handles scheduling tasks based on natural language input.
